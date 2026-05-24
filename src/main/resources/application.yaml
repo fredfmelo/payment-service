@@ -8,5 +8,6 @@ aws:
 
   sns:
     order-topic-arn: arn:aws:sns:us-east-1:200849340204:order-events
+
   sqs:
-    payment-queue-url: http://payment-url
+    payment-queue: payment-queue
