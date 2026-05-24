@@ -3,22 +3,21 @@ package com.fredfmelo.paymentservice.infrastructure.messaging;
 import org.springframework.stereotype.Component;
 
 import com.fredfmelo.paymentservice.payment.event.OrderCreatedEvent;
+import com.fredfmelo.paymentservice.payment.service.PaymentService;
 
 import io.awspring.cloud.sqs.annotation.SqsListener;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class PaymentQueueListener {
+
+    private final PaymentService paymentService;
 
     @SqsListener("${aws.sqs.payment-queue}")
     public void consume(OrderCreatedEvent event) {
-
-        log.info(
-                "Received order={} customer={} items={}",
-                event.orderId(),
-                event.customerId(),
-                event.items().size()
-        );
+        paymentService.process(event);
     }
 }
