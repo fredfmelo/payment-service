@@ -2,6 +2,9 @@ spring:
   application:
     name: payment-service
 
+server:
+  port: 8081
+
 aws:
   dynamodb:
     table-name: ORDER
@@ -11,3 +14,4 @@ aws:
 
   sqs:
     payment-queue: payment-queue
+
