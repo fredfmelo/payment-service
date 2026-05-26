@@ -26,36 +26,41 @@ public class IdempotencyService {
     private final IdempotencyRepository repository;
 
     public boolean acquire(String eventId) {
-        IdempotencyEntity existing = repository.find(eventId);
-
-        if (existing != null) {
-
-            if (PROCESSED.equals(existing.getStatus())) {
-                return false;
-            }
-
-            if (PROCESSING.equals(existing.getStatus())) {
-                long age = Duration.between(
-                        existing.getUpdatedAt(),
-                        Instant.now()
-                ).toMinutes();
-
-                return age > PROCESSING_TIMEOUT_MINUTES;
-            }
-        }
-
         IdempotencyEntity entity = new IdempotencyEntity();
 
         entity.setPk(PREFIX + eventId);
         entity.setSk(METADATA);
-        entity.setService(SERVICE);
 
+        entity.setService(SERVICE);
         entity.setStatus(PROCESSING);
 
         entity.setCreatedAt(Instant.now());
         entity.setUpdatedAt(Instant.now());
 
-        return repository.acquire(entity);
+        if (repository.acquire(entity)) {
+            return true;
+        }
+
+        IdempotencyEntity existing = repository.find(eventId);
+
+        if (existing == null) {
+            return false;
+        }
+
+        if (PROCESSED.equals(existing.getStatus())) {
+            return false;
+        }
+
+        if (PROCESSING.equals(existing.getStatus())) {
+            long age = Duration.between(
+                    existing.getUpdatedAt(),
+                    Instant.now()
+            ).toMinutes();
+
+            return age > PROCESSING_TIMEOUT_MINUTES;
+        }
+
+        return false;
     }
 
     public void markProcessed(String eventId) {
