@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.fredfmelo.paymentservice.infrastructure.messaging.PaymentEventPublisher;
+import com.fredfmelo.paymentservice.outbox.service.OutboxService;
 import com.fredfmelo.paymentservice.payment.event.OrderCreatedEvent;
 import com.fredfmelo.paymentservice.payment.event.PaymentApprovedEvent;
 
@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class PaymentService {
 
-    private final PaymentEventPublisher paymentEventPublisher;
+    private final OutboxService outboxService;
 
     public void process(OrderCreatedEvent event) {
         log.info("Processing payment order={} customer={}",
@@ -26,18 +26,26 @@ public class PaymentService {
 
         simulatePayment();
 
-        PaymentApprovedEvent approved = new PaymentApprovedEvent(UUID.randomUUID(),
-            "PAYMENT_APPROVED",
-            Instant.now(),
-            event.orderId());
+        createOutboxEvent(event);
+    }
 
-        log.info("Payment approved {}", approved);
+    private void createOutboxEvent(OrderCreatedEvent event) {
+        PaymentApprovedEvent approved = new PaymentApprovedEvent(
+                UUID.randomUUID(),
+                "PAYMENT_APPROVED",
+                Instant.now(),
+                event.orderId());
 
-        paymentEventPublisher.publish(approved);
+        log.info("Payment approved {}",
+                approved);
+
+        outboxService.save(
+                approved.eventId().toString(),
+                approved.eventType(),
+                approved);
     }
 
     private void simulatePayment() {
         // later: ledger / provider / anti-fraud
     }
-
 }

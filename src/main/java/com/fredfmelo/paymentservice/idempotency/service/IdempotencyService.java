@@ -2,7 +2,9 @@ package com.fredfmelo.paymentservice.idempotency.service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fredfmelo.paymentservice.idempotency.entity.IdempotencyEntity;
@@ -19,19 +21,21 @@ public class IdempotencyService {
 
     private static final String PROCESSING = "PROCESSING";
     private static final String PROCESSED = "PROCESSED";
-
-    private static final String SERVICE = "payment-service";
+    
     private static final long PROCESSING_TIMEOUT_MINUTES = 5;
 
     private final IdempotencyRepository repository;
 
-    public boolean acquire(String eventId) {
+    @Value("${spring.application.name}")
+    private String serviceName;
+
+    public boolean acquire(UUID eventId) {
         IdempotencyEntity entity = new IdempotencyEntity();
 
         entity.setPk(PREFIX + eventId);
         entity.setSk(METADATA);
 
-        entity.setService(SERVICE);
+        entity.setService(serviceName);
         entity.setStatus(PROCESSING);
 
         entity.setCreatedAt(Instant.now());
@@ -63,7 +67,7 @@ public class IdempotencyService {
         return false;
     }
 
-    public void markProcessed(String eventId) {
+    public void markProcessed(UUID eventId) {
         IdempotencyEntity entity = repository.find(eventId);
 
         entity.setStatus(PROCESSED);

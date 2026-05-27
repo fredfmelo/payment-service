@@ -21,7 +21,7 @@ public class PaymentQueueListener {
     @SqsListener("${aws.sqs.payment-queue}")
     public void consume(OrderCreatedEvent event) {
     
-        if (!idempotencyService.acquire(event.eventId().toString())) {
+        if (!idempotencyService.acquire(event.eventId())) {
             log.info("Duplicate event ignored eventId={}",
                     event.eventId());
     
@@ -30,8 +30,6 @@ public class PaymentQueueListener {
     
         paymentService.process(event);
     
-        idempotencyService.markProcessed(
-                event.eventId().toString()
-        );
+        idempotencyService.markProcessed(event.eventId());
     }
 }

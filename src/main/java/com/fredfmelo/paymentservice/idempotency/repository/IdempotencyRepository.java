@@ -1,5 +1,7 @@
 package com.fredfmelo.paymentservice.idempotency.repository;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Repository;
 
 import com.fredfmelo.paymentservice.config.ServiceConfig;
@@ -49,7 +51,7 @@ public class IdempotencyRepository {
         table().putItem(entity);
     }
 
-    public IdempotencyEntity find(String eventId) {
+    public IdempotencyEntity find(UUID eventId) {
 
         return table().getItem(
                 Key.builder().partitionValue("IDEMPOTENCY#" + eventId)
