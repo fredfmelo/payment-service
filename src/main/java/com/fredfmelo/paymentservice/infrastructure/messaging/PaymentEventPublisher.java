@@ -46,8 +46,7 @@ public class PaymentEventPublisher implements OutboxEventPublisher {
 
     private Map<String, MessageAttributeValue> buildAttributes(
             String eventType) {
-        return Map.of(
-                EVENT_TYPE,
+        return Map.of(EVENT_TYPE,
                 MessageAttributeValue.builder()
                         .dataType(DATA_TYPE_STRING)
                         .stringValue(eventType)

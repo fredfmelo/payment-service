@@ -36,11 +36,9 @@ public class PaymentService {
                 Instant.now(),
                 event.orderId());
 
-        log.info("Payment approved {}",
-                approved);
+        log.info("Payment approved {}", approved);
 
-        outboxService.save(
-                approved.eventId().toString(),
+        outboxService.save(approved.eventId().toString(),
                 approved.eventType(),
                 approved);
     }

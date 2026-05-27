@@ -2,7 +2,7 @@ package com.fredfmelo.paymentservice.infrastructure.messaging;
 
 import org.springframework.stereotype.Component;
 
-import com.fredfmelo.paymentservice.idempotency.service.IdempotencyService;
+import com.fredfmelo.paymentservice.idempotency.executor.IdempotentExecutor;
 import com.fredfmelo.paymentservice.payment.event.OrderCreatedEvent;
 import com.fredfmelo.paymentservice.payment.service.PaymentService;
 
@@ -16,20 +16,10 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentQueueListener {
 
     private final PaymentService paymentService;
-    private final IdempotencyService idempotencyService;
+    private final IdempotentExecutor idempotentExecutor;
 
     @SqsListener("${aws.sqs.payment-queue}")
     public void consume(OrderCreatedEvent event) {
-    
-        if (!idempotencyService.acquire(event.eventId())) {
-            log.info("Duplicate event ignored eventId={}",
-                    event.eventId());
-    
-            return;
-        }
-    
-        paymentService.process(event);
-    
-        idempotencyService.markProcessed(event.eventId());
+        idempotentExecutor.execute(event, () -> paymentService.process(event));
     }
 }
