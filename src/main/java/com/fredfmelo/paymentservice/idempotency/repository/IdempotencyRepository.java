@@ -29,13 +29,24 @@ public class IdempotencyRepository {
                 TableSchema.fromBean(IdempotencyEntity.class));
     }
 
+    /*
+     * Answers the question:
+     * Can I process this message?
+     *
+     * This is the heart of the idempotency flow.
+     * Its purpose is to atomically acquire ownership of an event.
+     *
+     * Save the entity only if it does not already exist.
+     *
+     * If successful, this thread owns the event processing.
+     * Concurrent threads processing the same event will fail.
+     */
     public boolean acquire(IdempotencyEntity entity) {
         try {
             PutItemEnhancedRequest<IdempotencyEntity> request = PutItemEnhancedRequest.builder(
                     IdempotencyEntity.class)
                     .item(entity)
-                    .conditionExpression(
-                            Expression.builder().expression("attribute_not_exists(pk)").build())
+                    .conditionExpression(Expression.builder().expression("attribute_not_exists(pk)").build())
                     .build();
 
             table().putItem(request);

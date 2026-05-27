@@ -30,16 +30,7 @@ public class IdempotencyService {
     private String serviceName;
 
     public boolean acquire(UUID eventId) {
-        IdempotencyEntity entity = new IdempotencyEntity();
-
-        entity.setPk(PREFIX + eventId);
-        entity.setSk(METADATA);
-
-        entity.setService(serviceName);
-        entity.setStatus(PROCESSING);
-
-        entity.setCreatedAt(Instant.now());
-        entity.setUpdatedAt(Instant.now());
+        IdempotencyEntity entity = createEntity(eventId);
 
         if (repository.acquire(entity)) {
             return true;
@@ -65,6 +56,21 @@ public class IdempotencyService {
         }
 
         return false;
+    }
+
+    public IdempotencyEntity createEntity(UUID eventId){
+        IdempotencyEntity entity = new IdempotencyEntity();
+
+        entity.setPk(PREFIX + eventId);
+        entity.setSk(METADATA);
+
+        entity.setService(serviceName);
+        entity.setStatus(PROCESSING);
+
+        entity.setCreatedAt(Instant.now());
+        entity.setUpdatedAt(Instant.now());
+
+        return entity;
     }
 
     public void markProcessed(UUID eventId) {
