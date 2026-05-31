@@ -3,10 +3,11 @@ package com.fredfmelo.paymentservice.payment.event;
 import java.time.Instant;
 import java.util.UUID;
 
-import com.fredfmelo.paymentservice.idempotency.event.IdempotentEvent;
+import com.fredfmelo.eventdrivencore.event.Event;
 
 public record PaymentApprovedEvent(UUID eventId,
-                String eventType,
-                Instant occurredAt,
-                String orderId) implements IdempotentEvent {
+        String traceId,
+        String eventType,
+        Instant occurredAt,
+        String orderId) implements Event {
 }

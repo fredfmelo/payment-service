@@ -1,12 +1,12 @@
-package com.fredfmelo.paymentservice.infrastructure.messaging;
+package com.fredfmelo.paymentservice.payment.publisher;
 
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.fredfmelo.paymentservice.common.exception.TechnicalException;
+import com.fredfmelo.eventdrivencore.exception.TechnicalException;
+import com.fredfmelo.eventdrivencore.outbox.publisher.OutboxEventPublisher;
 import com.fredfmelo.paymentservice.config.ServiceConfig;
-import com.fredfmelo.paymentservice.outbox.publisher.OutboxEventPublisher;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,28 +24,24 @@ public class PaymentEventPublisher implements OutboxEventPublisher {
     private static final String DATA_TYPE_STRING = "String";
 
     private final SnsClient snsClient;
-    private final ServiceConfig config;
+    private final ServiceConfig serviceConfig;
 
     @Override
     public void publish(String payload, String eventType) {
         try {
             PublishRequest request = PublishRequest.builder()
-                    .topicArn(config.getSns().getOrderTopicArn())
+                    .topicArn(serviceConfig.getAws().getSns().getOrderTopicArn())
                     .message(payload)
                     .messageAttributes(buildAttributes(eventType))
                     .build();
 
             snsClient.publish(request);
-
-            log.info("Published eventType={}", eventType);
-
         } catch (SdkException ex) {
             throw new TechnicalException("Error publishing event", ex);
         }
     }
 
-    private Map<String, MessageAttributeValue> buildAttributes(
-            String eventType) {
+    private Map<String, MessageAttributeValue> buildAttributes(String eventType) {
         return Map.of(EVENT_TYPE,
                 MessageAttributeValue.builder()
                         .dataType(DATA_TYPE_STRING)

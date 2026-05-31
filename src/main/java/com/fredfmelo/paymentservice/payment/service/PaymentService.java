@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.fredfmelo.paymentservice.outbox.service.OutboxService;
+import com.fredfmelo.eventdrivencore.outbox.service.OutboxService;
 import com.fredfmelo.paymentservice.payment.event.OrderCreatedEvent;
 import com.fredfmelo.paymentservice.payment.event.PaymentApprovedEvent;
 
@@ -29,21 +29,20 @@ public class PaymentService {
         createOutboxEvent(event);
     }
 
-    private void createOutboxEvent(OrderCreatedEvent event) {
-        PaymentApprovedEvent approved = new PaymentApprovedEvent(
+    private void createOutboxEvent(OrderCreatedEvent orderCreatedEvent) {
+        PaymentApprovedEvent paymentApprovedEvent = new PaymentApprovedEvent(
                 UUID.randomUUID(),
+                orderCreatedEvent.traceId(),
                 "PAYMENT_APPROVED",
                 Instant.now(),
-                event.orderId());
+                orderCreatedEvent.orderId());
 
-        log.info("Payment approved {}", approved);
-
-        outboxService.save(approved.eventId().toString(),
-                approved.eventType(),
-                approved);
+        //TODO: when the real payment structure is define, replace this save with a transactionalRepository that saves the business and outbox entity in the same transaction
+        outboxService.save(paymentApprovedEvent);
     }
 
     private void simulatePayment() {
-        // later: ledger / provider / anti-fraud
+        // TODO: implement ledger / provider / anti-fraud
+        log.info("[BUSINESS-FLOW-PLACEHOLDER] Simulating payment...");
     }
 }

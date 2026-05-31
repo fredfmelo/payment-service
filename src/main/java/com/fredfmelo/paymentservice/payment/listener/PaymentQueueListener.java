@@ -1,8 +1,8 @@
-package com.fredfmelo.paymentservice.infrastructure.messaging;
+package com.fredfmelo.paymentservice.payment.listener;
 
 import org.springframework.stereotype.Component;
 
-import com.fredfmelo.paymentservice.idempotency.executor.IdempotentExecutor;
+import com.fredfmelo.eventdrivencore.idempotency.executor.IdempotentExecutor;
 import com.fredfmelo.paymentservice.payment.event.OrderCreatedEvent;
 import com.fredfmelo.paymentservice.payment.service.PaymentService;
 
