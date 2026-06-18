@@ -35,7 +35,8 @@ public class PaymentService {
                 orderCreatedEvent.traceId(),
                 "PAYMENT_APPROVED",
                 Instant.now(),
-                orderCreatedEvent.orderId());
+                orderCreatedEvent.orderId(),
+                orderCreatedEvent.items());
 
         //TODO: when the real payment structure is define, replace this save with a transactionalRepository that saves the business and outbox entity in the same transaction
         outboxService.save(paymentApprovedEvent);
