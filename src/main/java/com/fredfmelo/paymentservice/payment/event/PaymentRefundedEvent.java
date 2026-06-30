@@ -1,0 +1,16 @@
+package com.fredfmelo.paymentservice.payment.event;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+
+import com.fredfmelo.eventdrivencore.event.Event;
+
+public record PaymentRefundedEvent(UUID eventId,
+        String traceId,
+        String eventType,
+        Instant occurredAt,
+        String orderId,
+        List<OrderItemEvent> items,
+        String reason) implements Event {
+}
