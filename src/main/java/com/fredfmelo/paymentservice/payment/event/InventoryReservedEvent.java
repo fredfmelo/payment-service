@@ -7,12 +7,11 @@ import java.util.UUID;
 
 import com.fredfmelo.eventdrivencore.event.Event;
 
-public record OrderCreatedEvent(UUID eventId,
-        String eventType,
+public record InventoryReservedEvent(UUID eventId,
         String traceId,
+        String eventType,
         Instant occurredAt,
         String orderId,
-        UUID customerId,
         BigDecimal totalAmount,
-        List<OrderItemEvent> items) implements Event {
+        List<InventoryReservedItem> items) implements Event {
 }

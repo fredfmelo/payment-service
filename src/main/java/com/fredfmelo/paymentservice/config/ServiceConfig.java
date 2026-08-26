@@ -15,6 +15,7 @@ import lombok.Setter;
 public class ServiceConfig implements DynamoProperties {
 
     private Aws aws;
+    private Services services;
 
     @Getter
     @Setter
@@ -33,6 +34,18 @@ public class ServiceConfig implements DynamoProperties {
     @Setter
     public static class Sns {
         private String orderTopicArn;
+    }
+
+    @Getter
+    @Setter
+    public static class Services {
+        private Ledger ledger;
+    }
+
+    @Getter
+    @Setter
+    public static class Ledger {
+        private String baseUrl;
     }
 
     @Override

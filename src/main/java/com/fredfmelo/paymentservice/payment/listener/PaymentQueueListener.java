@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fredfmelo.eventdrivencore.idempotency.executor.IdempotentExecutor;
+import com.fredfmelo.paymentservice.payment.event.InventoryReservedEvent;
 import com.fredfmelo.paymentservice.payment.event.InventoryUnavailableEvent;
 import com.fredfmelo.paymentservice.payment.event.OrderCreatedEvent;
 import com.fredfmelo.paymentservice.payment.service.PaymentService;
@@ -20,6 +21,7 @@ public class PaymentQueueListener {
 
     private static final String ORDER_CREATED = "ORDER_CREATED";
     private static final String INVENTORY_UNAVAILABLE = "INVENTORY_UNAVAILABLE";
+    private static final String INVENTORY_RESERVED = "INVENTORY_RESERVED";
 
     private final PaymentService paymentService;
     private final IdempotentExecutor idempotentExecutor;
@@ -38,6 +40,10 @@ public class PaymentQueueListener {
             case INVENTORY_UNAVAILABLE -> {
                 InventoryUnavailableEvent event = objectMapper.treeToValue(eventNode, InventoryUnavailableEvent.class);
                 idempotentExecutor.execute(event, () -> paymentService.processRefund(event));
+            }
+            case INVENTORY_RESERVED -> {
+                InventoryReservedEvent event = objectMapper.treeToValue(eventNode, InventoryReservedEvent.class);
+                idempotentExecutor.execute(event, () -> paymentService.processSellerPayout(event));
             }
             default -> log.warn("Ignoring unsupported event type={}", eventType);
         }

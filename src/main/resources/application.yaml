@@ -23,3 +23,7 @@ aws:
   sqs:
     payment-queue: payment-queue
 
+services:
+  ledger:
+    base-url: http://ledger-service:8088/api/ledger-service/v1
+
